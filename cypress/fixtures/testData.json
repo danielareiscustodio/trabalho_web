@@ -1,0 +1,39 @@
+{
+  "users": {
+    "validUser": {
+      "name": "Teste QA",
+      "email": "testeqa1234@test.com",
+      "password": "1234",
+      "firstName": "Teste",
+      "lastName": "QA",
+      "company": "Test Company",
+      "address": "avenida 1234",
+      "address2": "avenida 5678",
+      "country": "United States",
+      "state": "florida",
+      "city": "orlando",
+      "zipcode": "1309011",
+      "mobileNumber": "1998767898"
+    },
+    "invalidUser": {
+      "email": "invalid@test.com",
+      "password": "wrongpassword"
+    },
+    "existingUser": {
+      "email": "existing@test.com",
+      "password": "1234"
+    }
+  },
+  "products": {
+    "searchTerm": "Blue Top",
+    "productName": "Blue Top",
+    "category": "Women"
+  },
+  "contactForm": {
+    "name": "Test User",
+    "email": "test@test.com",
+    "subject": "Test Subject",
+    "message": "This is a test message for contact form."
+  }
+}
+
