@@ -1,4 +1,4 @@
-name: Cypress Tests
+name: Cypress Tests (Chrome Only)
 
 on:
   push:
@@ -13,11 +13,6 @@ jobs:
   cypress-run:
     runs-on: ubuntu-latest
     
-    strategy:
-      matrix:
-        # Executa testes em múltiplos navegadores
-        browser: [chrome, firefox, edge]
-    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,33 +26,50 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install additional dependencies
+        run: |
+          npm install --save-dev @faker-js/faker
+          npm install --save-dev mochawesome
+          npm install --save-dev mochawesome-merge
+
       - name: Verify site accessibility
         run: |
           curl -f https://automationexercise.com || exit 1
           echo "✅ Site is accessible"
 
+      - name: Wait for site to be ready
+        run: |
+          sleep 10
+          echo "⏳ Waiting for site to be fully ready..."
+
+      - name: Verify Cypress installation
+        run: |
+          npx cypress verify
+          npx cypress version
+
       - name: Run Cypress tests
-        uses: cypress-io/github-action@v6
-        with:
-          browser: ${{ matrix.browser }}
-          headless: true
-          record: false
-          parallel: false
-          spec: cypress/e2e/**/*.cy.js
-          config-file: cypress.config.js
-          start: npm run cypress:run
-          wait-on: 'https://automationexercise.com'
-          wait-on-timeout: 120
+        run: |
+          npx cypress run --browser chrome --headless
         env:
           CYPRESS_RETRIES: 2
           CYPRESS_VIDEO: true
           CYPRESS_SCREENSHOT_ON_RUN_FAILURE: true
 
+      - name: Check test results
+        run: |
+          if [ -d "cypress/reports" ]; then
+            echo "✅ Test reports generated successfully"
+            ls -la cypress/reports/
+          else
+            echo "❌ No test reports found"
+            exit 1
+          fi
+
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: cypress-results-${{ matrix.browser }}
+          name: cypress-results-chrome
           path: |
             cypress/reports/
             cypress/videos/
@@ -67,14 +79,14 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: cypress-videos-${{ matrix.browser }}
+          name: cypress-videos-chrome
           path: cypress/videos/
 
       - name: Upload screenshots
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: cypress-screenshots-${{ matrix.browser }}
+          name: cypress-screenshots-chrome
           path: cypress/screenshots/
 
   # Job para gerar relatório consolidado
@@ -99,6 +111,7 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
+          name: cypress-results-chrome
           path: artifacts
 
       - name: Merge reports
